@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Company.module.scss";
 import IconButton from "@/shared/api/ui/IconButton/IconButton";
 import CompanyDetails from "@/entities/company/ui/details/CompanyDetails";
@@ -6,10 +6,53 @@ import CompanyPhotos from "@/entities/company/ui/photos/CompanyPhotos";
 import CompanyContacts from "@/entities/contact/Contact";
 import RenameCompany from "@/entities/company/ui/rename/RenameCompany";
 import DeleteCompany from "@/entities/company/ui/delete/DeleteCompany";
+import { companyStore } from "@/entities/company/ui/store";
+import { observer } from "mobx-react-lite";
+import { get } from '@/entities/company/api'
+import { auth } from '@/shared/api/auth'
 
-const Company = () => {
+const Company = observer(() => {
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCompany = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // First check if we have a valid token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Try to authenticate
+        const isAuthenticated = await auth('admin');
+        if (!isAuthenticated) {
+          throw new Error('Authentication failed');
+        }
+      }
+
+      const company = await get(12);
+      companyStore.setCompany(company);
+    } catch (err) {
+      setError('Failed to load company data');
+      console.error('Error fetching company:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCompany();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <>
@@ -38,6 +81,6 @@ const Company = () => {
       <DeleteCompany isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
     </>
   );
-};
+});
 
 export default Company;
