@@ -6,10 +6,12 @@ import CompanyPhotos from "@/entities/company/ui/photos/CompanyPhotos";
 import CompanyContacts from "@/entities/contact/Contact";
 import RenameCompany from "@/entities/company/ui/rename/RenameCompany";
 import DeleteCompany from "@/entities/company/ui/delete/DeleteCompany";
-import { companyStore } from "@/entities/company/ui/store";
 import { observer } from "mobx-react-lite";
-import { get } from '@/entities/company/api'
+import { get as getCompany } from '@/entities/company/api';
+import { getContact } from '@/entities/contact/api';
 import { auth } from '@/shared/api/auth'
+import { contactStore } from "@/entities/contact/store";
+import { companyStore } from "@/entities/company/store";
 
 const Company = observer(() => {
   const [isRenameOpen, setIsRenameOpen] = useState(false);
@@ -32,8 +34,10 @@ const Company = observer(() => {
         }
       }
 
-      const company = await get(12);
+      const company = await getCompany(12);
+      const contacts = await getContact(16);
       companyStore.setCompany(company);
+      contactStore.setContact(contacts);
     } catch (err) {
       setError('Failed to load company data');
       console.error('Error fetching company:', err);

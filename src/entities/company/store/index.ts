@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { ICompany } from "../../types";
+import { ICompany } from "@/entities/company/types";
 
 export class CompanyStore {
   #company: ICompany | null = null;

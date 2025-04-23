@@ -6,12 +6,32 @@ import { useState } from "react";
 import CardLabel from "@/shared/api/ui/Card/CardLabel";
 import styles from "./Contact.module.scss";
 import Button from "@/shared/api/ui/Button/Button";
+import { contactStore } from "./store";
+import { observer } from "mobx-react-lite";
 
-const Contact = () => {
+const Contact = observer(() => {
   const [isEditing, setIsEditing] = useState(false);
-  const [responsiblePerson, setResponsiblePerson] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
+
+  const contact = contactStore.getContact();
+
+  if (!contact) return null;
+
+  const { firstname, lastname, phone, email } = contact;
+  const responsiblePerson = `${firstname} ${lastname}`;
+
+  const onResponsiblePersonChange = (value: string) => {
+    const [firstname, lastname] = value.split(" ");
+    contactStore.updateContact({ ...contact, firstname, lastname });
+  };
+
+  const onPhoneNumberChange = (value: string) => {
+    contactStore.updateContact({ ...contact, phone: value });
+  };  
+
+  const onEmailChange = (value: string) => {
+    contactStore.updateContact({ ...contact, email: value });
+  };
+
 
   return (
     <CardContainer>
@@ -55,7 +75,7 @@ const Contact = () => {
               <Input
                 placeholder="Enter responsible person name"
                 value={responsiblePerson}
-                onChange={(e) => setResponsiblePerson(e.target.value)}
+                onChange={(e) => onResponsiblePersonChange(e.target.value)}
               />
             ) : (
               <div className={styles.text}>{responsiblePerson || "-"}</div>
@@ -70,11 +90,11 @@ const Contact = () => {
             {isEditing ? (
               <Input
                 placeholder="Enter phone number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                value={phone}
+                onChange={(e) => onPhoneNumberChange(e.target.value)}
               />
             ) : (
-              <div className={styles.text}>{phoneNumber || "-"}</div>
+              <div className={styles.text}>{phone || "-"}</div>
             )}
           </div>
         </CardRow>
@@ -87,7 +107,7 @@ const Contact = () => {
               <Input
                 placeholder="Enter email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => onEmailChange(e.target.value)}
               />
             ) : (
               <div className={styles.text}>{email || "-"}</div>
@@ -97,6 +117,6 @@ const Contact = () => {
       </div>
     </CardContainer>
   );
-};
+});
 
 export default Contact;

@@ -7,7 +7,7 @@ import MultiSelect from "@/shared/api/ui/MultiSelect/MultiSelect";
 import CardLabel from "@/shared/api/ui/Card/CardLabel";
 import styles from "./CompanyDetails.module.scss";
 import Button from "@/shared/api/ui/Button/Button";
-import { companyStore } from "../store";
+import { companyStore } from "@/entities/company/store";
 import { observer } from "mobx-react-lite";
 import { formatDate, snakeToRegular } from "./lib";
 
@@ -24,7 +24,7 @@ const CompanyDetailsEdit = observer(({ onCancel, onSave }: CompanyDetailsEditPro
   const { contract, businessEntity, type } = company;
   const { no, issue_date } = contract || {};
   const date = formatDate(issue_date);
-  const types = type?.map((type) => ({ value: type, label: snakeToRegular(type) }));
+  const types = type?.map((type: string) => ({ value: type, label: snakeToRegular(type) }));
 
 
   const onAgreementNumberChange = (value: string) => {

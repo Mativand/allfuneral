@@ -4,7 +4,7 @@ import CardRow from "@/shared/api/ui/Card/CardRow";
 import CardLabel from "@/shared/api/ui/Card/CardLabel";
 import styles from "./CompanyDetails.module.scss";
 import Button from "@/shared/api/ui/Button/Button";
-import { companyStore } from "../store";
+import { companyStore } from "@/entities/company/store";
 import { observer } from "mobx-react-lite";
 import { formatDate, snakeToRegular } from "./lib";
 import CompanyDetailsEdit from "./CompanyDetailsEdit";

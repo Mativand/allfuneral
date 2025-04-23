@@ -2,38 +2,23 @@ import Button from "@/shared/api/ui/Button/Button";
 import CardContainer from "@/shared/api/ui/Card/CardContainer";
 import CardHeader from "@/shared/api/ui/Card/CardHeader";
 import styles from "./CompanyPhotos.module.scss";
-import { useState } from "react";
-import photo1 from "@/assets/1.png";
-import photo2 from "@/assets/2.png";
-import photo3 from "@/assets/3.png";
 import Photo from "./Photo";
+import { observer } from "mobx-react-lite";
+import { companyStore } from "../../store";
 
-const fakePhotos = [
-  {
-    id: 1,
-    url: photo1,
-  },
-  {
-    id: 2,
-    url: photo2,
-  },
-  {
-    id: 3,
-    url: photo3,
-  },
-];
+const CompanyPhotos = observer(() => {
+  const company = companyStore.getCompany();
 
-const CompanyPhotos = () => {
-  const [photos, setPhotos] = useState<{ id: number; url: string }[]>(
-    fakePhotos
-  );
+  if (!company) return null;
+
+  const { photos } = company;
 
   const onAddPhoto = () => {
     console.log("Add photo");
   };
 
-  const onDeletePhoto = (id: number) => {
-    setPhotos(photos.filter(photo => photo.id !== id));
+  const onDeletePhoto = (name: string) => {
+    console.log("Delete photo", name);
   };
 
   return (
@@ -55,9 +40,9 @@ const CompanyPhotos = () => {
         <div className={styles.photos__item}>
           {photos.map((photo) => (
             <Photo
-              key={photo.id}
-              id={photo.id}
-              url={photo.url}
+              key={photo.name}
+              name={photo.name}
+              url={photo.filepath}
               onDelete={onDeletePhoto}
             />
           ))}
@@ -65,6 +50,6 @@ const CompanyPhotos = () => {
       </div>
     </CardContainer>
   );
-};
+});
 
 export default CompanyPhotos;
