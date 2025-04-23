@@ -11,14 +11,10 @@ import CompanyDetailsEdit from "./CompanyDetailsEdit";
 import { useState, useEffect } from "react";
 
 const CompanyDetails = observer(() => {
-  const [isEditing, setIsEditing] = useState(false);
-
   const company = companyStore.getCompany();
-
-  if (!company) return null;
-
-  const { contract, businessEntity, type } = company;
+  const { contract, businessEntity, type } = company || {};
   const { no, issue_date } = contract || {};
+  const [isEditing, setIsEditing] = useState(false);
   const [date, setDate] = useState<string | undefined>(formatDate(issue_date));
   const [types, setTypes] = useState<{ value: string; label: string }[] | undefined>(
     type?.map((type: string) => ({ value: type, label: snakeToRegular(type) }))
@@ -29,12 +25,11 @@ const CompanyDetails = observer(() => {
     setTypes(type?.map((type: string) => ({ value: type, label: snakeToRegular(type) })));
   }, [issue_date, type]);
 
+  if (!company) return null;
+
   if (isEditing) {
     return (
-      <CompanyDetailsEdit
-        onSave={() => setIsEditing(false)}
-        onCancel={() => setIsEditing(false)}
-      />
+      <CompanyDetailsEdit setIsEditing={setIsEditing} />
     );
   }
 

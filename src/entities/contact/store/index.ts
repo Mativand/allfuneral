@@ -2,22 +2,22 @@ import { makeAutoObservable } from "mobx";
 import { IContact } from "../types";
 
 export class ContactStore {
-  #contact: IContact | null = null;
+  contact: IContact | null = null;
 
   constructor() {
     makeAutoObservable(this);
   }
 
   getContact = () => {
-    return this.#contact;
+    return this.contact;
   }
 
   setContact = (contact: IContact) => {
-    this.#contact = contact;
+    this.contact = contact;
   }
 
   updateContact = (contact: IContact) => {
-    this.#contact = contact;
+    this.contact = contact;
   }
 }
 

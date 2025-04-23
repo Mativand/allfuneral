@@ -13,11 +13,17 @@ import { auth } from '@/shared/api/auth'
 import { contactStore } from "@/entities/contact/store";
 import { companyStore } from "@/entities/company/store";
 
-const Company = observer(() => {
+interface CompanyProps {
+  companyId: number;
+  contactId: number;
+}
+
+const Company = observer(({ companyId, contactId }: CompanyProps) => {
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const company = companyStore.getCompany();
 
   const fetchCompany = async () => {
     try {
@@ -34,8 +40,8 @@ const Company = observer(() => {
         }
       }
 
-      const company = await getCompany(12);
-      const contacts = await getContact(16);
+      const company = await getCompany(companyId);
+      const contacts = await getContact(contactId);
       companyStore.setCompany(company);
       contactStore.setContact(contacts);
     } catch (err) {
@@ -54,6 +60,10 @@ const Company = observer(() => {
     return <div>Loading...</div>;
   }
 
+  if (company === null) {
+    return <div>Company not found</div>;
+  }
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -67,7 +77,7 @@ const Company = observer(() => {
         <div className={styles.company__main}>
           <div className={styles.company__main__header}>
             <div className={styles.company__main__header__title}>
-              Eternal Rest Funeral Home
+              {company.name}
             </div>
             <div className={styles.company__main__header__actions}>
               <IconButton icon="edit" onClick={() => setIsRenameOpen(true)} />

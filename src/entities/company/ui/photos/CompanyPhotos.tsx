@@ -5,26 +5,59 @@ import styles from "./CompanyPhotos.module.scss";
 import Photo from "./Photo";
 import { observer } from "mobx-react-lite";
 import { companyStore } from "../../store";
+import { useRef } from "react";
+import { addImage, removeImage } from "../../api";
+import { IPhoto } from "../../types";
 
 const CompanyPhotos = observer(() => {
   const company = companyStore.getCompany();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!company) return null;
-
-  const { photos } = company;
+  const { photos } = company || {};
 
   const onAddPhoto = () => {
-    console.log("Add photo");
+    fileInputRef.current?.click();
   };
 
   const onDeletePhoto = (name: string) => {
-    console.log("Delete photo", name);
+    if (!company) return;
+    removeImage(company.id, name).then((res) => {
+      if (res) {
+        companyStore.updateCompany({
+          ...company,
+          photos: company.photos.filter((photo) => photo.name !== name),
+        });
+      }
+    });
   };
 
+  const sendPhoto = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !company) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("company_id", company.id.toString());
+    addImage(company.id, file).then((res: IPhoto) => {
+      companyStore.updateCompany({
+        ...company,
+        photos: [...company.photos, { 
+          name: file.name, 
+          filepath: res.filepath,
+          thumbpath: res.thumbpath,
+          createdAt: new Date().toISOString()
+        }],
+      });
+    });
+  };
+
+  if (!company) return null;
+
   return (
-    <CardContainer>
-      <CardHeader
-        title="Photos"
+    <>
+      <input type="file" id="file" hidden ref={fileInputRef} onChange={sendPhoto} />
+      <CardContainer>
+        <CardHeader
+          title="Photos"
         children={
           <>
             <Button
@@ -38,7 +71,7 @@ const CompanyPhotos = observer(() => {
       />
       <div className={styles.photos}>
         <div className={styles.photos__item}>
-          {photos.map((photo) => (
+          {photos?.map((photo) => (
             <Photo
               key={photo.name}
               name={photo.name}
@@ -46,9 +79,10 @@ const CompanyPhotos = observer(() => {
               onDelete={onDeletePhoto}
             />
           ))}
+          </div>
         </div>
-      </div>
-    </CardContainer>
+      </CardContainer>
+    </>
   );
 });
 

@@ -8,6 +8,7 @@ import styles from "./Contact.module.scss";
 import Button from "@/shared/api/ui/Button/Button";
 import { contactStore } from "./store";
 import { observer } from "mobx-react-lite";
+import { updateContact } from "@/entities/contact/api";
 
 const Contact = observer(() => {
   const [isEditing, setIsEditing] = useState(false);
@@ -16,22 +17,56 @@ const Contact = observer(() => {
 
   if (!contact) return null;
 
-  const { firstname, lastname, phone, email } = contact;
-  const responsiblePerson = `${firstname} ${lastname}`;
+  const {
+    firstname: initialFirstname,
+    lastname: initialLastname,
+    phone: initialPhone,
+    email: initialEmail,
+  } = contact;
+  const [firstname, setFirstname] = useState(initialFirstname);
+  const [lastname, setLastname] = useState(initialLastname);
+  const [phone, setPhone] = useState(initialPhone);
+  const [email, setEmail] = useState(initialEmail);
+
+  const onSave = () => {
+    updateContact(contact.id, {
+      firstname,
+      lastname,
+      phone,
+      email,
+    }).then(() => {
+      contactStore.updateContact({
+        ...contact,
+        firstname,
+        lastname,
+        phone,
+        email,
+      });
+      setIsEditing(false);
+    });
+  };
+
+  const onCancel = () => {
+    setFirstname(initialFirstname);
+    setLastname(initialLastname);
+    setPhone(initialPhone);
+    setEmail(initialEmail);
+    setIsEditing(false);
+  };
 
   const onResponsiblePersonChange = (value: string) => {
     const [firstname, lastname] = value.split(" ");
-    contactStore.updateContact({ ...contact, firstname, lastname });
+    setFirstname(firstname);
+    setLastname(lastname);
   };
 
   const onPhoneNumberChange = (value: string) => {
-    contactStore.updateContact({ ...contact, phone: value });
-  };  
-
-  const onEmailChange = (value: string) => {
-    contactStore.updateContact({ ...contact, email: value });
+    setPhone(value);
   };
 
+  const onEmailChange = (value: string) => {
+    setEmail(value);
+  };
 
   return (
     <CardContainer>
@@ -45,13 +80,13 @@ const Contact = observer(() => {
                   variant="fluttened"
                   text="Save changes"
                   icon="check"
-                  onClick={() => setIsEditing(false)}
+                  onClick={onSave}
                 />
                 <Button
                   variant="fluttened"
                   text="Cancel"
                   icon="x"
-                  onClick={() => setIsEditing(false)}
+                  onClick={onCancel}
                 />
               </>
             ) : (
@@ -74,11 +109,13 @@ const Contact = observer(() => {
             {isEditing ? (
               <Input
                 placeholder="Enter responsible person name"
-                value={responsiblePerson}
+                value={`${firstname} ${lastname}`}
                 onChange={(e) => onResponsiblePersonChange(e.target.value)}
               />
             ) : (
-              <div className={styles.text}>{responsiblePerson || "-"}</div>
+              <div className={styles.text}>
+                {firstname && lastname ? `${firstname} ${lastname}` : "-"}
+              </div>
             )}
           </div>
         </CardRow>
